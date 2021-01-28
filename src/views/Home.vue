@@ -143,39 +143,53 @@
                     this.studentName = html.split('姓名')[1].split(']')[0].substring(1) // 获取学生姓名
                     let thead = '<h3 style="margin-bottom: 20px">' + this.studentName + '的成绩单（当前学期）</h3>' // 添加表头
                     let h = thead +'<div id'+ '=' + 'ok"' + html.split('ok')[1].split('<table width'+'=')[0]  // 获取成绩表代码
-                    let th = h.split('补重学期')[0] + '补重学期</td></tr>' // 获取表头代码
-                    let tr = h.split('2019-2020-2') // 前一个学期
-                    let tr1 = tr[tr.length - 1].split('tr') // 获取当前学期的成绩代码
-                    let gradesCode = '' // 拼接成绩单代码字符串
-                    let arr = []
-                    // 处理成绩单代码
-                    for (let i = 0; i < tr1.length; i++) {
-                        if (i % 2 === 0) {
-                            if (i > 1) {
-                                let str = '<tr' + tr1[i] + 'tr>' // 每一个学科成绩代码
-                                // 拿取详细数据
-                                let projectCode = str.split('td>')[5].split('<')[0] // 课程代码
-                                let project = str.split('td>')[7].split('<')[0] // 课程名称
-                                let grades = str.split('td>')[9].split('<')[0] // 成绩
-                                let credit = str.split('td>')[11].split('<')[0] // 学分
-                                let nature = str.split('td>')[15].split('<')[0] // 课程性质
-                                let code = str.split('td>')[1] === '√</'
-                                let obj = {
-                                    projectCode: projectCode,
-                                    project: project,
-                                    grades: grades,
-                                    credit: credit,
-                                    nature: nature,
-                                    code: code
-                                }
-                                arr.push(obj)
-                                gradesCode += str
-                            }
-                        }
-                    }
+                    // let th = h.split('补重学期')[0] + '补重学期</td></tr>' // 获取表头代码
+                    // let tr = h.split('2019-2020-2') // 前一个学期
+                    // let tr1 = tr[tr.length - 1].split('tr') // 获取当前学期的成绩代码
+                    // let gradesCode = '' // 拼接成绩单代码字符串
+                    // let arr = []
+                    // // 处理成绩单代码
+                    // for (let i = 0; i < tr1.length; i++) {
+                    //     if (i % 2 === 0) {
+                    //         if (i > 1) {
+                    //             let str = '<tr' + tr1[i] + 'tr>' // 每一个学科成绩代码
+                    //             // 拿取详细数据
+                    //             let projectCode = str.split('td>')[5].split('<')[0] // 课程代码
+                    //             let project = str.split('td>')[7].split('<')[0] // 课程名称
+                    //             let grades = str.split('td>')[9].split('<')[0] // 成绩
+                    //             let credit = str.split('td>')[11].split('<')[0] // 学分
+                    //             let nature = str.split('td>')[15].split('<')[0] // 课程性质
+                    //             let code = str.split('td>')[1] === '√</'
+                    //             if (!code) {
+                    //                 str = '<tr style="background: #ff9696"' + tr1[i] + 'tr>' // 每一个学科成绩代码
+                    //                 console.log("bujige")
+                    //             }
+                    //             let obj = {
+                    //                 projectCode: projectCode,
+                    //                 project: project,
+                    //                 grades: grades,
+                    //                 credit: credit,
+                    //                 nature: nature,
+                    //                 code: code
+                    //             }
+                    //             arr.push(obj)
+                    //             gradesCode += str
+                    //         }
+                    //     }
+                    // }
+                    let allGrades = h.split('补重学期')[1].substr(13) // 获取表头代码
+                    console.log(allGrades.split('<'+'tr'+'>'+'<'+'td' + '>'))
+                    // for (let i = 0; i < allGrades.length; i++) {
+                    //     let code = allGrades.split('td>')[1] === '√</'
+                    //     if (!code) {
+                    //         allGrades = '<tr style="background: #ff9696"' + tr1[i] + 'tr>' // 每一个学科成绩代码
+                    //         console.log("bujige")
+                    //     }
+                    // }
                     thead = '<h3 style="margin: 20px 0">' + this.studentName + '的成绩单（所有成绩）</h3>' // 添加表头
                     h = thead +'<div id'+ '=' + 'ok"' + html.split('ok')[1].split('<table width'+'=')[0]  // 获取成绩表代码
-                    this.html = th + gradesCode + '</table>' + h
+                    // this.html = th + gradesCode + '</table>' + h
+                    this.html = h
                     clearInterval(this.gradesTimer)
                     setTimeout(() => {
                         if (this.pdfCount === 0) {
