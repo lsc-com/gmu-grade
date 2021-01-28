@@ -122,12 +122,12 @@
                     let pageData = canvas.toDataURL('image/jpeg', 1.0)
                     let PDF = new JsPDf('', 'pt', 'a4')
                     if (leftHeight < pageHeight) {
-                        PDF.addImage(pageData, 'JPEG', 10, 10, imgWidth, imgHeight)
+                        PDF.addImage(pageData, 'JPEG', 10, 30, imgWidth, imgHeight)
                     } else {
                         while (leftHeight > 0) {
                             PDF.addImage(pageData, 'JPEG', 10, position, imgWidth, imgHeight)//这里的10是左右边距
                             leftHeight -= pageHeight
-                            position -= 841.89
+                            position -= 828.89
                             if (leftHeight > 0) {
                                 PDF.addPage()
                             }
