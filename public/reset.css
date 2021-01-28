@@ -47,3 +47,27 @@ body {
     background-attachment: fixed;
     -webkit-text-size-adjust: none;
 }
+
+.btn-l {
+    display: inline-block;
+    height: 35px;
+    line-height: 35px;
+    color: #FFFFFF !important;
+    border-color: #1E9FFF !important;
+    background: #1E9FFF !important;
+    margin-right: 10%;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.btn-r {
+    display: inline-block;
+    height: 35px;
+    line-height: 35px;
+    margin-left: 10%;
+    color: #1E9FFF !important;
+    border: 1px solid #a8daff;
+    background: #FFFFFF !important;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
