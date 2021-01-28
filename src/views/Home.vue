@@ -3,14 +3,23 @@
         <el-card>
             <h1 @click="getPdf">成绩查询快速通道</h1>
             <el-form :model="form" label-width="80px" ref="form" style="margin-top: 30px; text-align: left">
+<!--                <el-form-item label="选择学期">-->
+<!--                    <el-select v-model="semester" placeholder="请选择学期">-->
+<!--                        <el-option label="2018-2019-2" value="2018-2019-1"></el-option>-->
+<!--                        <el-option label="2019-2020-1" value="2018-2019-2"></el-option>-->
+<!--                        <el-option label="2019-2020-2" value="2019-2020-1"></el-option>-->
+<!--                        <el-option label="2020-2021-1" value="2019-2020-2"></el-option>-->
+<!--                        <el-option label="2020-2021-2" value="2020-2021-1"></el-option>-->
+<!--                    </el-select>-->
+<!--                </el-form-item>-->
                 <el-form-item label="账号">
-                    <el-input v-model="form.Account" @keyup.enter.native="login"></el-input>
+                    <el-input @keyup.enter.native="login" v-model="form.Account"></el-input>
                 </el-form-item>
                 <el-form-item label="密码">
-                    <el-input v-model="form.PWD" type="password" show-password @keyup.enter.native="login"></el-input>
+                    <el-input @keyup.enter.native="login" show-password type="password" v-model="form.PWD"></el-input>
                 </el-form-item>
                 <el-form-item label="验证码">
-                    <el-input v-model="form.CheckCode" @keyup.enter.native="login"></el-input>
+                    <el-input @keyup.enter.native="login" v-model="form.CheckCode"></el-input>
                 </el-form-item>
                 <el-form-item label="">
                     <el-image :src="url"></el-image>
@@ -21,7 +30,8 @@
                     <div @click="reload" class="btn-r" style="width: 40%">刷新页面</div>
                 </el-form-item>
             </el-form>
-            <div id="container" v-html="html"></div>
+            <div id="container" v-html="html">
+            </div>
         </el-card>
     </div>
 </template>
@@ -48,7 +58,9 @@
                 loading: false,
                 loginTimer: null,
                 gradesTimer: null,
-                pdfCount: 0
+                pdfCount: 0,
+                studentName: '',
+                semester: '2020-2021-1', // 学期
             }
         },
         mounted() {
@@ -65,47 +77,24 @@
             loginFun() {
                 this.loading = true
                 this.$https.post('/api/gnyxy/login.aspx', this.$qs.stringify(this.form)).then(() => {
-                    console.log("hello world")
                     this.$router.go(0)
                     this.$message.error("信息填写错误！")
                 }).catch((err) => {
-                    console.log(err)
-                    console.log(err.response)
-                    console.log(err.response.status)
                     if (err.response.status === 404) {
                         localStorage.setItem("username", this.form.Account)
                         localStorage.setItem("password", this.form.PWD)
-                        // this.$router.push('/about')
                         this.getGrades()
                         clearInterval(this.loginTimer)
                     } else if (err.response.status === 503) {
-                        this.loginFun(true)
+                        this.loginFun()
                     }
                 })
             },
             login() {
-                this.loginFun(false)
+                this.loginFun()
                 this.loginTimer = setInterval(() => {
-                    this.loginFun(true)
+                    this.loginFun()
                 }, 5000)
-            },
-            getGradesFun() {
-                this.$https.get('/api/gnyxy/JWXS/cjcx/jwxs_cjcx_like.aspx?usermain=' + this.form.Account).then(res => {
-                    this.loading = false
-                    this.html = res.data
-                    clearInterval(this.gradesTimer)
-                    setTimeout(() => {
-                        if (this.pdfCount === 0) {
-                            this.getPdf()
-                            this.pdfCount = 1
-                        }
-                    },200)
-                }).catch(err => {
-                    console.log(err.response.status)
-                    if (err) {
-                        this.getGradesFun(true)
-                    }
-                })
             },
             getGrades() {
                 this.getGradesFun()
@@ -113,8 +102,8 @@
                     this.getGradesFun()
                 }, 5000)
             },
-            getPdf () {
-                let title = this.form.Account
+            getPdf() {
+                let that = this
                 let targetDom = document.getElementById('container')
                 html2canvas(targetDom,
                     {
@@ -144,35 +133,63 @@
                             }
                         }
                     }
-                    PDF.save(title + '.pdf')
+                    PDF.save(that.studentName + '的成绩单' + '.pdf')
+                })
+            },
+            getGradesFun() {
+                this.$https.get('/api/gnyxy/JWXS/cjcx/jwxs_cjcx_like.aspx?usermain=' + this.form.Account).then(res => {
+                    this.loading = false
+                    let html = res.data
+                    this.studentName = html.split('姓名')[1].split(']')[0].substring(1) // 获取学生姓名
+                    let thead = '<h3 style="margin-bottom: 20px">' + this.studentName + '的成绩单（当前学期）</h3>' // 添加表头
+                    let h = thead +'<div id'+ '=' + 'ok"' + html.split('ok')[1].split('<table width'+'=')[0]  // 获取成绩表代码
+                    let th = h.split('补重学期')[0] + '补重学期</td></tr>' // 获取表头代码
+                    let tr = h.split('2019-2020-2') // 前一个学期
+                    let tr1 = tr[tr.length - 1].split('tr') // 获取当前学期的成绩代码
+                    let gradesCode = '' // 拼接成绩单代码字符串
+                    let arr = []
+                    // 处理成绩单代码
+                    for (let i = 0; i < tr1.length; i++) {
+                        if (i % 2 === 0) {
+                            if (i > 1) {
+                                let str = '<tr' + tr1[i] + 'tr>' // 每一个学科成绩代码
+                                // 拿取详细数据
+                                let projectCode = str.split('td>')[5].split('<')[0] // 课程代码
+                                let project = str.split('td>')[7].split('<')[0] // 课程名称
+                                let grades = str.split('td>')[9].split('<')[0] // 成绩
+                                let credit = str.split('td>')[11].split('<')[0] // 学分
+                                let nature = str.split('td>')[15].split('<')[0] // 课程性质
+                                let code = str.split('td>')[1] === '√</'
+                                let obj = {
+                                    projectCode: projectCode,
+                                    project: project,
+                                    grades: grades,
+                                    credit: credit,
+                                    nature: nature,
+                                    code: code
+                                }
+                                arr.push(obj)
+                                gradesCode += str
+                            }
+                        }
+                    }
+                    thead = '<h3 style="margin: 20px 0">' + this.studentName + '的成绩单（所有成绩）</h3>' // 添加表头
+                    h = thead +'<div id'+ '=' + 'ok"' + html.split('ok')[1].split('<table width'+'=')[0]  // 获取成绩表代码
+                    this.html = th + gradesCode + '</table>' + h
+                    clearInterval(this.gradesTimer)
+                    setTimeout(() => {
+                        if (this.pdfCount === 0) {
+                            this.getPdf()
+                            this.pdfCount = 1
+                        }
+                    }, 200)
+                }).catch(err => {
+                    if (err) {
+                        this.getGradesFun(true)
+                    }
                 })
             },
         }
     }
+
 </script>
-
-<style>
-    .btn-l {
-        display: inline-block;
-        height: 35px;
-        line-height: 35px;
-        color: #FFFFFF !important;
-        border-color: #1E9FFF !important;
-        background: #1E9FFF !important;
-        margin-right: 10%;
-        border-radius: 3px;
-        box-sizing: border-box;
-    }
-
-    .btn-r {
-        display: inline-block;
-        height: 35px;
-        line-height: 35px;
-        margin-left: 10%;
-        color: #1E9FFF !important;
-        border: 1px solid #a8daff;
-        background: #FFFFFF !important;
-        border-radius: 3px;
-        box-sizing: border-box;
-    }
-</style>
