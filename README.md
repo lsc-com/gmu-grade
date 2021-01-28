@@ -1,24 +1,8 @@
 # gmu-grade
 
-## Project setup
-```
-npm install
-```
+### Note 注意事项
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+> Don't move the scroll bar when you've finished querying your grades，you have to wait!
+> 
+> 查询完成绩后不要立即移动滚动条，否则pdf内容不全
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
