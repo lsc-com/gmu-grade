@@ -47,7 +47,8 @@
                 },
                 loading: false,
                 loginTimer: null,
-                gradesTimer: null
+                gradesTimer: null,
+                pdfCount: 0
             }
         },
         mounted() {
@@ -94,7 +95,10 @@
                     this.html = res.data
                     clearInterval(this.gradesTimer)
                     setTimeout(() => {
-                        this.getPdf()
+                        if (this.pdfCount === 0) {
+                            this.getPdf()
+                            this.pdfCount = 1
+                        }
                     },200)
                 }).catch(err => {
                     console.log(err.response.status)
